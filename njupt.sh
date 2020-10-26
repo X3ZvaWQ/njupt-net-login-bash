@@ -22,7 +22,7 @@ fi
 curlStr=$(curl baidu.com)
 isConnectedStr=$(echo $curlStr | grep -o "http://www.baidu.com/")
 connectedStr="http://www.baidu.com/"
-if [ "$isConnectedStr" == "$connectedStr" ]
+if [ "$isConnectedStr"x = "$connectedStr"x ]
 then
 	printf "ERROR: The network is connected. If you need to switch the network, please log out first! \n\n"
 	exit 0
@@ -36,8 +36,8 @@ else
 	wlanacip=$(echo $curlStr | grep -Eo "wlanacip\=[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" | grep -Eo "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" | head -1)
 	echo "wlanacip: ${wlanacip}"
 
-	wlanacname=$(echo $curlStr | grep -Eo "wlanacname\=[A-Za-z0-9\-]+" | grep -Eo "\=[A-Za-z0-9\-]+" | head -1)
-	wlanacname="${wlanacname:1}"
+	wlanacname=$(echo $curlStr | grep -Eo "wlanacname\=[A-Za-z0-9\-]+" | grep -Eo "\=[A-Za-z0-9\-]+" | head -1 | awk '{print substr($1,2)'})
+	#wlanacname="${wlanacname:1}"
 	echo "wlanacname: ${wlanacname}"
 
 fi
