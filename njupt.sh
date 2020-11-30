@@ -10,11 +10,11 @@ printf "Trying to login \n\n"
 
 if [ "$isp" = "cmcc" ] 
 then
-	loginisp=%40cmcc
+	loginisp="@cmcc"
 	printf "ISP choose to cmcc\n\n"
 elif [ "$isp" = "ctcc" ]
 then
-	loginisp=%40njxy
+	loginisp="@njxy"
 	printf "ISP choose to njxy\n\n"
 fi
 
@@ -27,16 +27,20 @@ then
 	printf "ERROR: The network is connected. If you need to switch the network, please log out first! \n\n"
 	exit 0
 else
-	loginhost=$(echo $curlStr | grep -Eo "http://[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" | grep -Eo "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" | head -1)
+	loginhost=$(echo $curlStr | grep -Eo "http://[0-9A-Za-z]+\.[0-9A-Za-z]+\.[0-9A-Za-z]+\.[0-9A-Za-z]+" | grep -Eo "[0-9A-Za-z]+\.[0-9A-Za-z]+\.[0-9A-Za-z]+\.[0-9A-Za-z]+" | head -1)
 	echo "loginhost: ${loginhost}"
 
 	wlanuserip=$(echo $curlStr | grep -Eo "wlanuserip\=[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" | grep -Eo "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" | head -1)
+	if [ ${#wlanuserip} -lt 4 ]
+	then
+		wlanuserip=$(echo $curlStr | grep -Eo "UserIP\=[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" | grep -Eo "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" | head -1)
+	fi
 	echo "wlanuserip: ${wlanuserip}"
 
 	wlanacip=$(echo $curlStr | grep -Eo "wlanacip\=[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" | grep -Eo "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" | head -1)
 	echo "wlanacip: ${wlanacip}"
 
-	wlanacname=$(echo $curlStr | grep -Eo "wlanacname\=[A-Za-z0-9\-]+" | grep -Eo "\=[A-Za-z0-9\-]+" | head -1 | awk '{print substr($1,2)'})
+	wlanacname=$(echo $curlStr | grep -Eo "wlanacname\=[A-Za-z0-9_\-]+" | grep -Eo "\=[A-Za-z0-9_\-]+" | head -1 | awk '{print substr($1,2)'})
 	#wlanacname="${wlanacname:1}"
 	echo "wlanacname: ${wlanacname}"
 
@@ -45,7 +49,7 @@ fi
 # judge username 
 if [ ${username} ]
 then
-	loginname=%2C0%2C"${username}${loginisp}"
+	loginname=",0,${username}${loginisp}"
 	echo "username：$username"
 else
 	printf "ERROR: unknown username \n\n"
@@ -62,4 +66,7 @@ else
 	exit 0
 fi
 
-curl "http://${loginhost}:801/eportal/?c=ACSetting&a=Login&protocol=http:&hostname=${loginhost}&iTermType=1&wlanuserip=${wlanuserip}&wlanacip=${wlanacip}&wlanacname=${wlanacname}&mac=00-00-00-00-00-00&ip=${wlanuserip}&enAdvert=0&queryACIP=0&loginMethod=1" --data "DDDDD=${loginname}&upass=${loginpwd}&R1=0&R2=0&R3=0&R6=0&para=00&0MKKey=123456&buttonClicked=&redirect_url=&err_flag=&username=&password=&user=&cmd=&Login=&v6ip="
+curl "http://${loginhost}:801/eportal/?c=ACSetting&a=Login&protocol=http:&hostname=${loginhost}&iTermType=1&wlanuserip=${wlanuserip}&wlanacip=${wlanacip}&wlanacname=${wlanacname}&mac=00-00-00-00-00-00&ip=${wlanuserip}&enAdvert=0&queryACIP=0&loginMethod=1" \
+	--data-urlencode "DDDDD=$loginname" \
+	--data-urlencode "upass=$loginpwd" \
+	--data "R1=0&R2=0&R3=0&R6=0&para=00&0MKKey=123456&buttonClicked=&redirect_url=&err_flag=&username=&password=&user=&cmd=&Login=&v6ip="
